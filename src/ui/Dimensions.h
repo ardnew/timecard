@@ -1,0 +1,26 @@
+#ifndef __DIMENSIONS_H__
+#define __DIMENSIONS_H__
+
+#define SCREEN_WIDTH        240
+#define SCREEN_HEIGHT       320
+
+#define WIFI_IMAGE_WIDTH    22
+#define WIFI_IMAGE_HEIGHT   16
+
+#define STATUS_BAR_H_PAD    8
+#define STATUS_BAR_V_PAD    6
+
+#define STATUS_BAR_WIDTH    (SCREEN_WIDTH)
+#define STATUS_BAR_HEIGHT   ((WIFI_IMAGE_HEIGHT) + (2 * (STATUS_BAR_V_PAD)))
+
+#define NAVIGATOR_H_PAD     12
+#define NAVIGATOR_V_PAD     10
+
+#define NAVIGATOR_WIDTH     (SCREEN_WIDTH)
+#define NAVIGATOR_HEIGHT    ((SCREEN_HEIGHT) - (STATUS_BAR_HEIGHT))
+
+#define ROLLER_ACTIVITIES   5
+
+#define TIME_BAR_HEIGHT     8
+
+#endif // __DIMENSIONS_H__
