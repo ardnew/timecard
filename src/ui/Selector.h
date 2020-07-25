@@ -16,6 +16,8 @@ public:
   void update(void);
   void setProjects(const char *projects);
   void setActivities(const char *activities);
+  lv_obj_t *projectList(void) { return _proList; }
+  lv_obj_t *activityRoller(void) { return _actRoll; }
 };
 
 #endif // __SELECTOR_H__

@@ -7,6 +7,7 @@ Navigator::Navigator(void):
   _selectTab(nullptr),
   _controlTab(nullptr)
 {
+  ; // empty
 }
 
 void Navigator::initLayout(lv_obj_t *parent)
@@ -29,7 +30,7 @@ void Navigator::initLayout(lv_obj_t *parent)
   lv_obj_set_pos(_tabView, 0, tabViewPosY);
   lv_tabview_set_btns_pos(_tabView, LV_TABVIEW_TAB_POS_BOTTOM);
 
-  _selectTab = lv_tabview_add_tab(_tabView, "Activity");
+  _selectTab = lv_tabview_add_tab(_tabView, LV_SYMBOL_LIST " Activity");
   _controlTab = lv_tabview_add_tab(_tabView, "Clock");
 
   _selector.initLayout(_selectTab);

@@ -33,11 +33,11 @@ void Selector::initLayout(lv_obj_t *parent)
   lv_roller_set_visible_row_count(_actRoll, ROLLER_ACTIVITIES);
   lv_obj_set_width(_actRoll, rollerWidth);
   lv_obj_align(_actRoll, _proList, LV_ALIGN_OUT_BOTTOM_MID, 0, NAVIGATOR_V_PAD);
-  // lv_obj_set_event_cb(_actRoll, event_handler);
 }
 
 void Selector::update(void)
 {
+  ; // empty
 }
 
 void Selector::setProjects(const char *projects)

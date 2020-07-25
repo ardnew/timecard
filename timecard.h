@@ -23,6 +23,9 @@
 
 #define CLOCK_TIMEZONE         "America/Chicago"
 
+#define MAX_HOURS_PER_DAY      12
+#define REG_HOURS_PER_DAY      8
+
 #define CPU_SLEEP_DELAY        5 // milliseconds
 
 #define PRINTF_DEBUG_MAX_LEN   256 // undef or 0 to disable debug printing
@@ -38,6 +41,8 @@
 #endif
 
 typedef unsigned long timespan_t; // storage for arduino's millis()
+
+#define sizeof_array(x) (sizeof(x) / sizeof(*(x)))
 
 typedef enum
 {
