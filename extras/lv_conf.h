@@ -1,0 +1,1 @@
+/usr/local/src/arduino/libraries/lv_conf.h
