@@ -4,8 +4,8 @@ Controller::Controller(void):
   _timeGauge(nullptr),
   _overtimeSwitch(nullptr),
   _overtimeLabel(nullptr),
-  _restartToggle(nullptr),
-  _restartLabel(nullptr)
+  _workToggle(nullptr),
+  _workLabel(nullptr)
 {
   ; // empty
 }
@@ -40,16 +40,16 @@ void Controller::initLayout(lv_obj_t *parent)
 
   lv_gauge_set_value(_timeGauge, 0, 0);
 
-  _restartToggle = lv_btn_create(_timeGauge, NULL);
-  lv_obj_align(_restartToggle, NULL, LV_ALIGN_CENTER, 0, RESTART_TOGGLE_V_ALIGN);
-  lv_btn_set_checkable(_restartToggle, true);
-  lv_btn_set_fit2(_restartToggle, LV_FIT_TIGHT, LV_FIT_TIGHT);
+  _workToggle = lv_btn_create(_timeGauge, NULL);
+  lv_obj_align(_workToggle, NULL, LV_ALIGN_CENTER, 0, RESTART_TOGGLE_V_ALIGN);
+  lv_btn_set_checkable(_workToggle, true);
+  lv_btn_set_fit2(_workToggle, LV_FIT_TIGHT, LV_FIT_TIGHT);
 
-  _restartLabel = lv_label_create(_restartToggle, NULL);
-  lv_obj_align(_restartLabel, NULL, LV_ALIGN_CENTER, 0, 0);
+  _workLabel = lv_label_create(_workToggle, NULL);
+  lv_obj_align(_workLabel, NULL, LV_ALIGN_CENTER, 0, 0);
 
   onOvertimeSwitch(false);
-  onRestartToggle(false);
+  onWorkToggle(false);
 }
 
 void Controller::update(void)
@@ -62,13 +62,27 @@ void Controller::onOvertimeSwitch(bool isOn)
   // TBD
 }
 
-void Controller::onRestartToggle(bool isOn)
+void Controller::onWorkToggle(bool isOn)
 {
   if (isOn) {
-    lv_label_set_text(_restartLabel, LV_SYMBOL_PAUSE);
+    lv_label_set_text(_workLabel, LV_SYMBOL_PAUSE);
   } else {
-    lv_label_set_text(_restartLabel, LV_SYMBOL_PLAY);
+    lv_label_set_text(_workLabel, LV_SYMBOL_PLAY);
   }
+}
+
+void Controller::setIsWorking(bool isWorking)
+{
+  if (isWorking) {
+    if (LV_BTN_STATE_RELEASED == lv_btn_get_state(_workToggle)) {
+      lv_btn_toggle(_workToggle);
+    }
+  } else {
+    if (LV_BTN_STATE_CHECKED_RELEASED == lv_btn_get_state(_workToggle)) {
+      lv_btn_toggle(_workToggle);
+    }
+  }
+  onWorkToggle(isWorking);
 }
 
 static void timeGaugeLabelFormat(lv_obj_t *gauge, char *buf, int bufsize, int32_t value)

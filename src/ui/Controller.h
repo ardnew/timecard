@@ -11,17 +11,18 @@ protected:
   lv_obj_t *_timeGauge;
   lv_obj_t *_overtimeSwitch;
   lv_obj_t *_overtimeLabel;
-  lv_obj_t *_restartToggle;
-  lv_obj_t *_restartLabel;
+  lv_obj_t *_workToggle;
+  lv_obj_t *_workLabel;
 public:
   constexpr static int32_t const hourScale = 10;
   Controller(void);
   void initLayout(lv_obj_t *parent);
   void update(void);
   void onOvertimeSwitch(bool isOn);
-  void onRestartToggle(bool isOn);
+  void onWorkToggle(bool isOn);
+  void setIsWorking(bool isWorking);
   lv_obj_t *overtimeSwitch(void) { return _overtimeSwitch; }
-  lv_obj_t *restartToggle(void) { return _restartToggle; }
+  lv_obj_t *workToggle(void) { return _workToggle; }
 };
 
 static void timeGaugeLabelFormat(lv_obj_t *gauge, char *buf, int bufsize, int32_t value);

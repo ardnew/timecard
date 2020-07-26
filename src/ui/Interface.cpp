@@ -1,5 +1,6 @@
 #include "Interface.h"
 
+#include "../time/TimeKeeper.h"
 #include "Selector.h"
 #include "Controller.h"
 
@@ -27,7 +28,7 @@ void Interface::initLayout(void)
   lv_obj_set_event_cb(selector->projectList(), handleProjectSelect);
   lv_obj_set_event_cb(selector->activityRoller(), handleActivitySelect);
   lv_obj_set_event_cb(controller->overtimeSwitch(), handleOvertimeSwitch);
-  lv_obj_set_event_cb(controller->restartToggle(), handleRestartToggle);
+  lv_obj_set_event_cb(controller->workToggle(), handleWorkToggle);
 
   // initialize default project and activity
   if (_board->projectCount() > 0) {
@@ -36,45 +37,70 @@ void Interface::initLayout(void)
     free(projects);
     onProjectSelect(0);
   }
-
-  // force statusbar event handlers to fire
-  onMinuteChange(); // calls onSecondChange()
 }
 
 void Interface::update(void)
 {
-  // fire the ezTime events loop
-  events();
-
-  // fire the LvGL events loop
-  lv_task_handler();
-
-  // update statusbar
-  if (minuteChanged())      { onMinuteChange(); }
-  else if (secondChanged()) { onSecondChange(); }
-
   // update content views
   _navigator.update();
-
-  delay(CPU_SLEEP_DELAY);
-}
-
-void Interface::onSecondChange(void)
-{
-  char *currentTime = _board->currentTime("M j, H:i:s");
-  _statusBar.updateTime(currentTime);
-  free(currentTime);
-
-  _statusBar.updateWiFi(_board->isConnectedWiFi(), _board->signalQualityWiFi());
 }
 
 void Interface::onMinuteChange(void)
 {
-  onSecondChange();
+  ; // empty
+}
+
+void Interface::onSecondChange(void)
+{
+  if (nullptr != timeKeeper) {
+    char *currentTime = timeKeeper->currentTime("M j, H:i:s");
+    _statusBar.updateTime(currentTime);
+    free(currentTime);
+  }
+
+  _statusBar.updateWiFi(_board->isConnectedWiFi(), _board->signalQualityWiFi());
+}
+
+void Interface::onDayChange(void)
+{
+
+}
+
+void Interface::onRegHoursWorked(void)
+{
+
+}
+
+void Interface::onMaxHoursWorked(void)
+{
+
+}
+
+void Interface::onWorkBlockChange(void)
+{
+  if (nullptr != timeKeeper) {
+    char *currentTime = timeKeeper->currentTime("M j, H:i:s");
+    infof("work block: %s", currentTime);
+    free(currentTime);
+  }
+}
+
+void Interface::onIsWorkingChange(void)
+{
+  if (nullptr != timeKeeper) {
+    infof("is working: %s", timeKeeper->isWorking() ? "true" : "false");
+    Controller *controller = _navigator.controller();
+    if (nullptr != controller) {
+      controller->setIsWorking(timeKeeper->isWorking());
+    }
+  }
 }
 
 void Interface::onProjectSelect(int selected)
 {
+  if (nullptr != timeKeeper) {
+    timeKeeper->setIsWorking(false);
+  }
   if (nullptr != _board) {
     _project = _board->project(selected);
     if (nullptr != _project && _project->activityCount() > 0) {
@@ -92,6 +118,9 @@ void Interface::onProjectSelect(int selected)
 
 void Interface::onActivitySelect(int selected)
 {
+  if (nullptr != timeKeeper) {
+    timeKeeper->setIsWorking(false);
+  }
   if (nullptr != _project) {
     _activity = _project->activity(selected);
     if (nullptr != _activity) {
@@ -108,11 +137,14 @@ void Interface::onOvertimeSwitch(bool isOn)
   }
 }
 
-void Interface::onRestartToggle(bool isOn)
+void Interface::onWorkToggle(bool isOn)
 {
   Controller *controller = _navigator.controller();
   if (nullptr != controller) {
-    controller->onRestartToggle(isOn);
+    controller->onWorkToggle(isOn);
+  }
+  if (nullptr != timeKeeper) {
+    timeKeeper->setIsWorking(isOn);
   }
 }
 
@@ -143,11 +175,11 @@ static void handleOvertimeSwitch(lv_obj_t *obj, lv_event_t event)
   }
 }
 
-static void handleRestartToggle(lv_obj_t *obj, lv_event_t event)
+static void handleWorkToggle(lv_obj_t *obj, lv_event_t event)
 {
   if (nullptr != interface) {
     if (LV_EVENT_VALUE_CHANGED == event) {
-      interface->onRestartToggle(LV_BTN_STATE_CHECKED_RELEASED == lv_btn_get_state(obj));
+      interface->onWorkToggle(LV_BTN_STATE_CHECKED_RELEASED == lv_btn_get_state(obj));
     }
   }
 }

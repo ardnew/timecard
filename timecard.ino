@@ -4,6 +4,8 @@
 #ifdef ADAFRUIT_PYPORTAL
 #include "src/hw/PyPortal.h"
 #endif
+
+#include "src/time/TimeKeeper.h"
 #include "src/ui/Interface.h"
 
 void setup(void)
@@ -24,13 +26,7 @@ void setup(void)
         errf("%s", "failed to read WiFi settings");
       }
 
-      board->synchronizeTime();
-      board->setTimezone(CLOCK_TIMEZONE);
-
-      char *currentTime = board->currentTime();
-      infof("%s:", "current time");
-      infof("\t%s", currentTime);
-      free(currentTime);
+      timeKeeper->initLocalTime(CLOCK_TIMEZONE);
 
       if (board->readProjectSettings(FILE_PROJECTS_JSON)) {
         infof("found %d projects:", board->projectCount());
@@ -43,6 +39,7 @@ void setup(void)
       }
 
       interface = new Interface(board);
+      timeKeeper->add(interface);
 
       break;
     }
@@ -63,7 +60,15 @@ void setup(void)
 
 void loop(void)
 {
-  interface->update(); // includes sleep delay
+  // fire the ezTime events loop
+  events();
+
+  // fire the LvGL events loop
+  lv_task_handler();
+
+  timeKeeper->update();
+
+  delay(CPU_SLEEP_DELAY);
 }
 
 void print(info_level_t level, const char *fmt, ...)

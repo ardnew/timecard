@@ -9,10 +9,12 @@ Clock::Clock(void):
 void Clock::setTimezone(const char *tz)
 {
   _tz->setLocation(tz);
+  _tz->setDefault();
 }
 
 void Clock::synchronize(void)
 {
+  setInterval(NTP_SYNC_INTERVAL);
   waitForSync();
 }
 

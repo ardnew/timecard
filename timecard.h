@@ -22,6 +22,9 @@
 #define FILE_PROJECTS_JSON     "projects.json"
 
 #define CLOCK_TIMEZONE         "America/Chicago"
+#define NTP_SYNC_INTERVAL      30 * 60 // seconds (= 30 minutes)
+
+#define WORK_BLOCK_INTERVAL    6 * 60 // seconds (= 6 minutes)
 
 #define MAX_HOURS_PER_DAY      12
 #define REG_HOURS_PER_DAY      8
