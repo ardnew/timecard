@@ -58,12 +58,15 @@ public:
 
   Board::InitError begin(void);
 
-  bool readWiFiSettings(const char *filepath);
+  bool loadWiFiSettings(const char *filepath);
   bool connectToWiFi(void);
   bool isConnectedWiFi(void);
   int signalQualityWiFi(void);
 
-  bool readProjectSettings(const char *filepath);
+  bool loadProjectSettings(const char *filepath);
+
+  bool assertWorkLog(char **filepath, const TimeStamp &timeStamp);
+  bool appendWorkLogEntry(char *filepath, char *entry);
 };
 
 #endif // __PYPORTAL_H__

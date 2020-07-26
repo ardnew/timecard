@@ -114,6 +114,20 @@ void TimeKeeper::add(TimeRunner *runner)
   }
 }
 
+void TimeKeeper::onDayChange(void)
+{
+  if (nullptr != _runs) {
+    for (int i = 0; i < _runs->size(); ++i) {
+      TimeRunner *run = _runs->get(i);
+      if (nullptr != run) {
+        run->onDayChange();
+        run->onMinuteChange();
+        run->onSecondChange();
+      }
+    }
+  }
+}
+
 void TimeKeeper::onMinuteChange(void)
 {
   if (nullptr != _clock) {
@@ -142,20 +156,6 @@ void TimeKeeper::onSecondChange(void)
     for (int i = 0; i < _runs->size(); ++i) {
       TimeRunner *run = _runs->get(i);
       if (nullptr != run) {
-        run->onSecondChange();
-      }
-    }
-  }
-}
-
-void TimeKeeper::onDayChange(void)
-{
-  if (nullptr != _runs) {
-    for (int i = 0; i < _runs->size(); ++i) {
-      TimeRunner *run = _runs->get(i);
-      if (nullptr != run) {
-        run->onDayChange();
-        run->onMinuteChange();
         run->onSecondChange();
       }
     }
@@ -223,13 +223,6 @@ void TimeKeeper::setIsWorking(bool isWorking)
     } else {
       deleteEvent(_workSlot);
     }
-  }
-}
-
-static void handleDayChange(void)
-{
-  if (nullptr != timeKeeper) {
-    timeKeeper->onDayChange();
   }
 }
 

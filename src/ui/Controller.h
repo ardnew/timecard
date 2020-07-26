@@ -23,6 +23,10 @@ public:
   void setIsWorking(bool isWorking);
   lv_obj_t *overtimeSwitch(void) { return _overtimeSwitch; }
   lv_obj_t *workToggle(void) { return _workToggle; }
+  static bool isToggleOff(lv_obj_t *button)
+    { return LV_BTN_STATE_RELEASED == lv_btn_get_state(button); }
+  static bool isToggleOn(lv_obj_t *button)
+    { return LV_BTN_STATE_CHECKED_RELEASED == lv_btn_get_state(button); }
 };
 
 static void timeGaugeLabelFormat(lv_obj_t *gauge, char *buf, int bufsize, int32_t value);

@@ -73,16 +73,16 @@ void Controller::onWorkToggle(bool isOn)
 
 void Controller::setIsWorking(bool isWorking)
 {
-  if (isWorking) {
-    if (LV_BTN_STATE_RELEASED == lv_btn_get_state(_workToggle)) {
+  if (isWorking) { // requested to start work
+    if (Controller::isToggleOff(_workToggle)) { // button is toggled off
       lv_btn_toggle(_workToggle);
     }
-  } else {
-    if (LV_BTN_STATE_CHECKED_RELEASED == lv_btn_get_state(_workToggle)) {
+  } else { // requested to stop work
+    if (Controller::isToggleOn(_workToggle)) { // button is toggled on
       lv_btn_toggle(_workToggle);
     }
   }
-  onWorkToggle(isWorking);
+  onWorkToggle(isWorking); // update button label
 }
 
 static void timeGaugeLabelFormat(lv_obj_t *gauge, char *buf, int bufsize, int32_t value)

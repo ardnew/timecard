@@ -5,9 +5,9 @@ class TimeRunner
 {
 public:
   virtual void update(void) =0;
+  virtual void onDayChange(void) =0;
   virtual void onMinuteChange(void) =0;
   virtual void onSecondChange(void) =0;
-  virtual void onDayChange(void) =0;
   virtual void onRegHoursWorked(void) =0;
   virtual void onMaxHoursWorked(void) =0;
   virtual void onWorkBlockChange(void) =0;

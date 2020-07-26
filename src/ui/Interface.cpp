@@ -45,6 +45,11 @@ void Interface::update(void)
   _navigator.update();
 }
 
+void Interface::onDayChange(void)
+{
+  ; // empty
+}
+
 void Interface::onMinuteChange(void)
 {
   ; // empty
@@ -61,34 +66,24 @@ void Interface::onSecondChange(void)
   _statusBar.updateWiFi(_board->isConnectedWiFi(), _board->signalQualityWiFi());
 }
 
-void Interface::onDayChange(void)
-{
-
-}
-
 void Interface::onRegHoursWorked(void)
 {
-
+ ; // empty
 }
 
 void Interface::onMaxHoursWorked(void)
 {
-
+  ; // empty
 }
 
 void Interface::onWorkBlockChange(void)
 {
-  if (nullptr != timeKeeper) {
-    char *currentTime = timeKeeper->currentTime("M j, H:i:s");
-    infof("work block: %s", currentTime);
-    free(currentTime);
-  }
+  ; // empty
 }
 
 void Interface::onIsWorkingChange(void)
 {
   if (nullptr != timeKeeper) {
-    infof("is working: %s", timeKeeper->isWorking() ? "true" : "false");
     Controller *controller = _navigator.controller();
     if (nullptr != controller) {
       controller->setIsWorking(timeKeeper->isWorking());
@@ -179,7 +174,7 @@ static void handleWorkToggle(lv_obj_t *obj, lv_event_t event)
 {
   if (nullptr != interface) {
     if (LV_EVENT_VALUE_CHANGED == event) {
-      interface->onWorkToggle(LV_BTN_STATE_CHECKED_RELEASED == lv_btn_get_state(obj));
+      interface->onWorkToggle(Controller::isToggleOn(obj));
     }
   }
 }

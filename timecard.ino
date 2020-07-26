@@ -6,6 +6,7 @@
 #endif
 
 #include "src/time/TimeKeeper.h"
+#include "src/log/WorkLogger.h"
 #include "src/ui/Interface.h"
 
 void setup(void)
@@ -15,7 +16,7 @@ void setup(void)
   switch (board->begin()) {
     case Board::InitError::None: {
 
-      if (board->readWiFiSettings(FILE_WIFI_JSON)) {
+      if (board->loadWiFiSettings(FILE_WIFI_JSON)) {
         bool isConnected = board->connectToWiFi();
         if (isConnected) {
           infof("%s", "connected!");
@@ -28,7 +29,7 @@ void setup(void)
 
       timeKeeper->initLocalTime(CLOCK_TIMEZONE);
 
-      if (board->readProjectSettings(FILE_PROJECTS_JSON)) {
+      if (board->loadProjectSettings(FILE_PROJECTS_JSON)) {
         infof("found %d projects:", board->projectCount());
         for (int i = 0; i < board->projectCount(); ++i) {
           Project *p = board->project(i);
@@ -37,6 +38,9 @@ void setup(void)
       } else {
         errf("%s", "failed to read project settings");
       }
+
+      workLogger = new WorkLogger(board);
+      timeKeeper->add(workLogger);
 
       interface = new Interface(board);
       timeKeeper->add(interface);

@@ -23,6 +23,9 @@ protected:
 public:
   Interface(Board *board);
 
+  Project *project() { return _project; }
+  Activity *activity() { return _activity; }
+
   void initLayout(void);
 
   void update(void);

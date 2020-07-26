@@ -22,7 +22,7 @@ Board::InitError PyPortal::begin(void)
   return InitError::None;
 }
 
-bool PyPortal::readWiFiSettings(const char *filepath)
+bool PyPortal::loadWiFiSettings(const char *filepath)
 {
   if (nullptr == filepath) {
     return false;
@@ -61,7 +61,7 @@ int PyPortal::signalQualityWiFi(void)
   }
 }
 
-bool PyPortal::readProjectSettings(const char *filepath)
+bool PyPortal::loadProjectSettings(const char *filepath)
 {
   if (nullptr == filepath) {
     return false;
@@ -71,6 +71,55 @@ bool PyPortal::readProjectSettings(const char *filepath)
   bool success = _ps->loadStream(stream);
   file.close();
   return success;
+}
+
+bool PyPortal::assertWorkLog(char **filepath, const TimeStamp &timeStamp)
+{
+  static char yearStr[5], monthStr[3], dayStr[3];
+  static const char extension[] = "log";
+  static const size_t dirLen = 1 + sizeof(yearStr) + 1 + sizeof(monthStr);
+  static const size_t pathLen = dirLen + 1 + sizeof(dayStr) + 1 + sizeof(extension);
+  static char dir[dirLen + 1];   // e.g.: "/2020/07"
+  static char path[pathLen + 1]; //       "/2020/07/13.log"
+
+  // initialize buffers
+  memset(dir, 0, dirLen + 1);
+  memset(path, 0, pathLen + 1);
+
+  // construct components and paths
+  snprintf(yearStr,  sizeof(yearStr),  "%04d",     timeStamp.year());
+  snprintf(monthStr, sizeof(monthStr), "%02d",     timeStamp.month());
+  snprintf(dayStr,   sizeof(dayStr),   "%02d",     timeStamp.day());
+  snprintf(dir,      dirLen+1,         "/%s/%s",   yearStr, monthStr);
+  snprintf(path,     pathLen+1,        "%s/%s.%s", dir, dayStr, extension);
+
+  // copy path to output - be sure to free after use!
+  *filepath = (char *)calloc(pathLen+1, sizeof(**filepath));
+  *filepath = strncpy(*filepath, path, pathLen);
+
+  if (_sd->exists(path)) {
+    return true; // file exists, no need to continue
+  }
+
+  // file does not exist, check if parent directory exists.
+  if (!_sd->exists(dir)) {
+    // create parent directory (and all of its parent directories)
+    if (!_sd->mkdir(dir, true)) {
+      return false; // couldn't create parent directory
+    }
+  }
+
+  // parent directory exists, create file
+  SdFile file(path, O_WRITE | O_CREAT);
+  if (!file.isOpen()) {
+    return false; // failed to create file
+  }
+  return file.close(); // ensure file is closed before returning for usage.
+}
+
+bool PyPortal::appendWorkLogEntry(char *filepath, char *entry)
+{
+
 }
 
 bool PyPortal::initSd()

@@ -3,6 +3,7 @@
 
 #include "cfg/WiFiSettings.h"
 #include "cfg/ProjectSettings.h"
+#include "time/TimeKeeper.h"
 
 class Board
 {
@@ -21,7 +22,7 @@ public:
   }
 
   virtual InitError begin(void) =0;
-  virtual bool readWiFiSettings(const char *filepath) =0;
+  virtual bool loadWiFiSettings(const char *filepath) =0;
   virtual bool connectToWiFi(void) =0;
   virtual bool isConnectedWiFi(void) =0;
   virtual int signalQualityWiFi(void) =0;
@@ -30,7 +31,7 @@ public:
   AccessPoint *accessPoint(int n)
     { return nullptr != _ws ? _ws->accessPoint(n) : nullptr; }
 
-  virtual bool readProjectSettings(const char *filepath) =0;
+  virtual bool loadProjectSettings(const char *filepath) =0;
   size_t projectCount()
     { return nullptr != _ps ? _ps->projectCount() : 0; }
   Project *project(int n)
@@ -39,6 +40,9 @@ public:
     { return nullptr != _ps ? _ps->joinProjects(sep) : nullptr; }
   char *activitiesJoinedBy(int projectIndex, const char *sep)
     { return nullptr != _ps ? _ps->joinActivities(projectIndex, sep) : nullptr; }
+
+  virtual bool assertWorkLog(char **filepath, const TimeStamp &timeStamp) =0;
+  virtual bool appendWorkLogEntry(char *filepath, char *entry) =0;
 };
 
 extern Board *board;

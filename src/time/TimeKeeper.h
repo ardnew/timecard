@@ -27,17 +27,17 @@ public:
     _month  = elem.Month;
     _year   = elem.Year;
   }
-  time_t   time()   { return makeTime(_hour, _minute, 0, _day, _month, _year); }
-  uint8_t  minute() { return _minute; }
-  uint8_t  hour()   { return _hour; }
-  uint8_t  day()    { return _day; }
-  uint8_t  month()  { return _month; }
-  uint16_t year()   { return _year + 1970; }
-  bool didMinuteChange(TimeStamp &ts) { return _minute != ts._minute; }
-  bool didHourChange(TimeStamp &ts)   { return _hour != ts._hour; }
-  bool didDayChange(TimeStamp &ts)    { return _day != ts._day; }
-  bool didMonthChange(TimeStamp &ts)  { return _month != ts._month; }
-  bool didYearChange(TimeStamp &ts)   { return _year != ts._year; }
+  time_t   time()   const { return makeTime(_hour, _minute, 0, _day, _month, _year); }
+  uint8_t  minute() const { return _minute; }
+  uint8_t  hour()   const { return _hour; }
+  uint8_t  day()    const { return _day; }
+  uint8_t  month()  const { return _month; }
+  uint16_t year()   const { return _year + 1970; }
+  bool didMinuteChange(const TimeStamp &ts) const { return _minute != ts._minute; }
+  bool didHourChange(const TimeStamp &ts)   const { return _hour != ts._hour; }
+  bool didDayChange(const TimeStamp &ts)    const { return _day != ts._day; }
+  bool didMonthChange(const TimeStamp &ts)  const { return _month != ts._month; }
+  bool didYearChange(const TimeStamp &ts)   const { return _year != ts._year; }
 };
 
 class TimeKeeper
@@ -66,9 +66,9 @@ public:
 
   TimeStamp timeStamp(void) { return _timeStamp; }
 
+  void onDayChange(void);
   void onMinuteChange(void);
   void onSecondChange(void);
-  void onDayChange(void);
   void onRegHoursWorked(void);
   void onMaxHoursWorked(void);
   void onWorkBlockChange(void);
@@ -80,7 +80,6 @@ public:
 
 extern TimeKeeper *timeKeeper;
 
-static void handleDayChange(void);
 static void handleWorkBlockChange(void);
 
 #endif // __TIME_KEEPER_H__
