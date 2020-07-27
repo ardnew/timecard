@@ -1,6 +1,6 @@
 
 # timecard
-Arduino application to track hours charged to projects while working from home
+### PyPortal (Arduino) application to track hours charged to projects
 
 <p align="center">
   <img src="extras/images/holding.png" />
