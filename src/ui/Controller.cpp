@@ -85,6 +85,11 @@ void Controller::setIsWorking(bool isWorking)
   onWorkToggle(isWorking); // update button label
 }
 
+void Controller::setWorked(uint32_t minutes)
+{
+  lv_gauge_set_value(_timeGauge, 0, minutes / (60 / Controller::hourScale));
+}
+
 static void timeGaugeLabelFormat(lv_obj_t *gauge, char *buf, int bufsize, int32_t value)
 {
   snprintf(buf, bufsize, "%d", value / Controller::hourScale);

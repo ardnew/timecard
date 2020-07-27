@@ -41,6 +41,8 @@ public:
   void onActivitySelect(int selected);
   void onOvertimeSwitch(bool isOn);
   void onWorkToggle(bool isOn);
+
+  bool isOvertimeEnabled(void);
 };
 
 extern Interface *interface;

@@ -3,6 +3,8 @@
 #include "../time/TimeKeeper.h"
 #include "../ui/Interface.h"
 
+#define FIELD_DELIM "\t"
+
 WorkLogger *workLogger;
 
 WorkLogger::WorkLogger(Board *board):
@@ -13,67 +15,102 @@ WorkLogger::WorkLogger(Board *board):
 
 void WorkLogger::logWork(void)
 {
-  static const char fieldDelim[] = "\t";
+  static const char fieldDelim[] = FIELD_DELIM;
   static const size_t fieldDelimLen = sizeof(fieldDelim);
 
-  if (nullptr != timeKeeper) {
-    if (nullptr != interface) {
-      Project *project = interface->project();
-      Activity *activity = interface->activity();
-      if (nullptr != project && nullptr != activity) {
-        if (nullptr != _board) {
-          char *filepath = nullptr;
-          if (_board->assertWorkLog(&filepath, timeKeeper->timeStamp())) {
-            char *dateTime     = timeKeeper->currentTime(RFC3339);
-            char *activityId   = activity->id();
-            char *projectName  = project->name();
-            char *activityDesc = activity->desc();
+  if (nullptr != timeKeeper && nullptr != interface && nullptr != _board) {
 
-            if (nullptr != filepath    &&
-                nullptr != dateTime    &&
-                nullptr != activityId  &&
-                nullptr != projectName &&
-                nullptr != activityDesc) {
-              size_t dateTimeLen     = strlen(dateTime);
-              size_t activityIdLen   = strlen(activityId);
-              size_t projectNameLen  = strlen(projectName);
-              size_t activityDescLen = strlen(activityDesc);
+    Project *project = interface->project();
+    Activity *activity = interface->activity();
+    if (nullptr != project && nullptr != activity) {
 
-              size_t entryLen =
-                dateTimeLen     + fieldDelimLen +
-                activityIdLen   + fieldDelimLen +
-                projectNameLen  + fieldDelimLen +
-                activityDescLen ;
+      char *filepath = nullptr;
+      if (_board->assertWorkLog(&filepath, timeKeeper->timeStamp())) {
 
-              char *entry = (char *)calloc(entryLen+1, sizeof(*entry));
-              snprintf(entry, entryLen+1, "%s%s%s%s%s%s%s",
-                dateTime, fieldDelim,
-                activityId, fieldDelim,
-                projectName, fieldDelim,
-                activityDesc
-              );
+        char *dateTime     = timeKeeper->currentTime(RFC3339);
+        char *activityId   = activity->id();
+        char *projectName  = project->name();
+        char *activityDesc = activity->desc();
 
-              infof("log(%s): { 'dateTime': '%s', 'project': '%s', 'id': '%s', 'desc': '%s' }",
-                filepath, dateTime, projectName, activityId, activityDesc
-              );
-              _board->appendWorkLogEntry(filepath, entry);
+        if (nullptr != filepath    &&
+            nullptr != dateTime    &&
+            nullptr != activityId  &&
+            nullptr != projectName &&
+            nullptr != activityDesc) {
+          size_t dateTimeLen     = strlen(dateTime);
+          size_t workBlockLen    = WorkLogger::digitCount(WORK_BLOCK_MINUTES);
+          size_t activityIdLen   = strlen(activityId);
+          size_t projectNameLen  = strlen(projectName);
+          size_t activityDescLen = strlen(activityDesc);
 
-            }
-            free(dateTime);
+          size_t entryLen =
+            dateTimeLen     + fieldDelimLen +
+            workBlockLen    + fieldDelimLen +
+            activityIdLen   + fieldDelimLen +
+            projectNameLen  + fieldDelimLen +
+            activityDescLen ;
 
-          } else {
-            errf("%s", "failed to create log file");
+          char *entry = (char *)calloc(entryLen+1, sizeof(*entry));
+          snprintf(entry, entryLen+1, "%s%s%d%s%s%s%s%s%s",
+            dateTime,           fieldDelim,
+            WORK_BLOCK_MINUTES, fieldDelim,
+            activityId,         fieldDelim,
+            projectName,        fieldDelim,
+            activityDesc
+          );
+          // infof("log(%s): { 'dateTime': '%s', 'minutes': '%s', 'project': '%s', 'id': '%s', 'desc': '%s' }",
+          //   filepath, dateTime, WORK_BLOCK_MINUTES, projectName, activityId, activityDesc
+          // );
+          if (!_board->appendWorkLogEntry(filepath, entry)) {
+            errf("%s", "failed to write log entry");
           }
+        }
+        free(dateTime);
 
-          // free the filepath string if it was allocated
-          if (nullptr != filepath) {
-            free(filepath);
-          }
+      } else {
+        errf("%s", "failed to create log file");
+      }
 
-        } // _board
-      } // project, activity
-    } // interface
-  } // timeKeeper
+      // free the filepath string if it was allocated
+      if (nullptr != filepath) {
+        free(filepath);
+      }
+
+    } // project, activity
+  } // timeKeeper, interface, _board
+}
+
+uint32_t WorkLogger::parseMinutes(char *line)
+{
+  char *token = strtok(line, FIELD_DELIM); // first token is timestamp
+  if (nullptr != token) {
+    token = strtok(0, FIELD_DELIM); // second token is minutes
+    if (nullptr != token) {
+      return (uint32_t)strtoul(token, 0, 10);
+    }
+  }
+
+  return 0;
+}
+
+bool WorkLogger::totalMinutesWorked(uint32_t *minutes)
+{
+  bool success = false;
+
+  if (nullptr != timeKeeper && nullptr != _board) {
+
+    char *filepath = nullptr;
+    success =
+      _board->assertWorkLog(&filepath, timeKeeper->timeStamp()) &&
+      _board->parseWorkLogMinutes(minutes, filepath);
+
+    // free the filepath string if it was allocated
+    if (nullptr != filepath) {
+      free(filepath);
+    }
+  }
+
+  return success;
 }
 
 void WorkLogger::update(void)
@@ -108,7 +145,11 @@ void WorkLogger::onMaxHoursWorked(void)
 
 void WorkLogger::onWorkBlockChange(void)
 {
-  logWork();
+  if (nullptr != timeKeeper) {
+    if (timeKeeper->isWorking()) {
+      logWork();
+    }
+  }
 }
 
 void WorkLogger::onIsWorkingChange(void)

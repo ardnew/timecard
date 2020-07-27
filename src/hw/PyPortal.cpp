@@ -1,5 +1,7 @@
 #include "PyPortal.h"
 
+#include "../log/WorkLogger.h"
+
 Board *board = new PyPortal();
 
 PyPortal::PyPortal(void):
@@ -98,6 +100,7 @@ bool PyPortal::assertWorkLog(char **filepath, const TimeStamp &timeStamp)
   *filepath = strncpy(*filepath, path, pathLen);
 
   if (_sd->exists(path)) {
+    //_sd->remove(path);
     return true; // file exists, no need to continue
   }
 
@@ -110,7 +113,7 @@ bool PyPortal::assertWorkLog(char **filepath, const TimeStamp &timeStamp)
   }
 
   // parent directory exists, create file
-  SdFile file(path, O_WRITE | O_CREAT);
+  File file = _sd->open(path, O_WRITE | O_CREAT);
   if (!file.isOpen()) {
     return false; // failed to create file
   }
@@ -119,7 +122,33 @@ bool PyPortal::assertWorkLog(char **filepath, const TimeStamp &timeStamp)
 
 bool PyPortal::appendWorkLogEntry(char *filepath, char *entry)
 {
+  infof("log(%s) -> %s", filepath, entry);
+  File file = _sd->open(filepath, O_WRITE | O_AT_END);
+  if (file.isOpen()) {
+    file.println(entry);
+    bool ok = file.sync() && !file.getWriteError();
+    return file.close() && ok;
+  }
+  return false;
+}
 
+bool PyPortal::parseWorkLogMinutes(uint32_t *minutes, char *filepath)
+{
+  File file = _sd->open(filepath);
+  ReadBufferingStream stream(file, PARSE_BUF_SZ);
+  String buffer;
+
+  *minutes = 0;
+  while (stream.available()) {
+    buffer = stream.readStringUntil('\n');
+    if (buffer.length() > 0) {
+      char *cstr = (char *)calloc(buffer.length()+1, sizeof(*cstr));
+      buffer.toCharArray(cstr, buffer.length()+1);
+      *minutes += WorkLogger::parseMinutes(cstr);
+      free(cstr);
+    }
+  }
+  file.close();
 }
 
 bool PyPortal::initSd()

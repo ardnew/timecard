@@ -45,6 +45,12 @@ void setup(void)
       interface = new Interface(board);
       timeKeeper->add(interface);
 
+      // if we restarted, load the total minutes already logged.
+      uint32_t minutesLogged;
+      if (workLogger->totalMinutesWorked(&minutesLogged)) {
+        timeKeeper->setMinutesWorked(minutesLogged);
+      }
+
       break;
     }
     case Board::InitError::SD: {

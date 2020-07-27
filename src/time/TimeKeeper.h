@@ -76,6 +76,9 @@ public:
 
   void setIsWorking(bool isWorking);
   bool isWorking(void) { return _isWorking; }
+
+  void setMinutesWorked(uint32_t minutes);
+  uint32_t minutesWorked(void) { return _minutesWorked; }
 };
 
 extern TimeKeeper *timeKeeper;

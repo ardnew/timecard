@@ -67,6 +67,7 @@ public:
 
   bool assertWorkLog(char **filepath, const TimeStamp &timeStamp);
   bool appendWorkLogEntry(char *filepath, char *entry);
+  bool parseWorkLogMinutes(uint32_t *minutes, char *filepath);
 };
 
 #endif // __PYPORTAL_H__

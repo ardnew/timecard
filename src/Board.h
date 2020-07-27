@@ -43,6 +43,7 @@ public:
 
   virtual bool assertWorkLog(char **filepath, const TimeStamp &timeStamp) =0;
   virtual bool appendWorkLogEntry(char *filepath, char *entry) =0;
+  virtual bool parseWorkLogMinutes(uint32_t *minutes, char *filepath) =0;
 };
 
 extern Board *board;

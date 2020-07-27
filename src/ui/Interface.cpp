@@ -41,8 +41,21 @@ void Interface::initLayout(void)
 
 void Interface::update(void)
 {
+  static uint32_t lastMinutesWorked = 0;
+
   // update content views
   _navigator.update();
+
+  if (nullptr != timeKeeper) {
+    uint32_t currMinutesWorked = timeKeeper->minutesWorked();
+    if (lastMinutesWorked != currMinutesWorked) {
+      lastMinutesWorked = currMinutesWorked;
+      Controller *controller = _navigator.controller();
+      if (nullptr != controller) {
+        controller->setWorked(currMinutesWorked);
+      }
+    }
+  }
 }
 
 void Interface::onDayChange(void)
@@ -68,17 +81,23 @@ void Interface::onSecondChange(void)
 
 void Interface::onRegHoursWorked(void)
 {
- ; // empty
+  if (!isOvertimeEnabled()) {
+    if (nullptr != timeKeeper) {
+      timeKeeper->setIsWorking(false);
+    }
+  }
 }
 
 void Interface::onMaxHoursWorked(void)
 {
-  ; // empty
+  if (nullptr != timeKeeper) {
+    timeKeeper->setIsWorking(false);
+  }
 }
 
 void Interface::onWorkBlockChange(void)
 {
-  ; // empty
+  ;
 }
 
 void Interface::onIsWorkingChange(void)
@@ -143,6 +162,15 @@ void Interface::onWorkToggle(bool isOn)
   }
 }
 
+bool Interface::isOvertimeEnabled(void)
+{
+  Controller *controller = _navigator.controller();
+  if (nullptr != controller) {
+    return Controller::isSwitchOn(controller->overtimeSwitch());
+  }
+  return false;
+}
+
 static void handleProjectSelect(lv_obj_t *obj, lv_event_t event)
 {
   if (nullptr != interface) {
@@ -165,7 +193,7 @@ static void handleOvertimeSwitch(lv_obj_t *obj, lv_event_t event)
 {
   if (nullptr != interface) {
     if (LV_EVENT_VALUE_CHANGED == event) {
-      interface->onOvertimeSwitch(lv_switch_get_state(obj));
+      interface->onOvertimeSwitch(Controller::isSwitchOn(obj));
     }
   }
 }

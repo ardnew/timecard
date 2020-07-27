@@ -116,6 +116,7 @@ void TimeKeeper::add(TimeRunner *runner)
 
 void TimeKeeper::onDayChange(void)
 {
+  _minutesWorked = 0;
   if (nullptr != _runs) {
     for (int i = 0; i < _runs->size(); ++i) {
       TimeRunner *run = _runs->get(i);
@@ -188,16 +189,28 @@ void TimeKeeper::onMaxHoursWorked(void)
 
 void TimeKeeper::onWorkBlockChange(void)
 {
-  if (nullptr != _runs) {
-    for (int i = 0; i < _runs->size(); ++i) {
-      TimeRunner *run = _runs->get(i);
-      if (nullptr != run) {
-        run->onWorkBlockChange();
+  if (_isWorking) {
+    bool shouldLog = true;
+    _workSlot = setEvent(handleWorkBlockChange, secondsAfterNow(WORK_BLOCK_INTERVAL));
+    _minutesWorked += WORK_BLOCK_MINUTES;
+    uint32_t hoursWorked = _minutesWorked / 60;
+    if (hoursWorked >= MAX_HOURS_PER_DAY) {
+      shouldLog = MAX_HOURS_PER_DAY == hoursWorked;
+      onMaxHoursWorked();
+    } else if (hoursWorked >= REG_HOURS_PER_DAY) {
+      shouldLog = REG_HOURS_PER_DAY == hoursWorked;
+      onRegHoursWorked();
+    }
+    if (shouldLog) {
+      if (nullptr != _runs) {
+        for (int i = 0; i < _runs->size(); ++i) {
+          TimeRunner *run = _runs->get(i);
+          if (nullptr != run) {
+            run->onWorkBlockChange();
+          }
+        }
       }
     }
-  }
-  if (_isWorking) {
-    _workSlot = setEvent(handleWorkBlockChange, secondsAfterNow(WORK_BLOCK_INTERVAL));
   }
 }
 
@@ -224,6 +237,11 @@ void TimeKeeper::setIsWorking(bool isWorking)
       deleteEvent(_workSlot);
     }
   }
+}
+
+void TimeKeeper::setMinutesWorked(uint32_t minutes)
+{
+  _minutesWorked = minutes;
 }
 
 static void handleWorkBlockChange(void)

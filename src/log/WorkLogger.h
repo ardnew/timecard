@@ -15,6 +15,8 @@ protected:
 public:
   WorkLogger(Board *board);
 
+  bool totalMinutesWorked(uint32_t *minutes);
+
   void update(void);
   void onMinuteChange(void);
   void onSecondChange(void);
@@ -23,6 +25,12 @@ public:
   void onMaxHoursWorked(void);
   void onWorkBlockChange(void);
   void onIsWorkingChange(void);
+
+  static uint32_t parseMinutes(char *line);
+
+  static uint digitCount(uint n) {
+    return (uint)(floorf(log10f((float)n))) + 1;
+  }
 };
 
 extern WorkLogger *workLogger;
