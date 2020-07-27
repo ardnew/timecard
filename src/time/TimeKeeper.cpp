@@ -116,7 +116,6 @@ void TimeKeeper::add(TimeRunner *runner)
 
 void TimeKeeper::onDayChange(void)
 {
-  _minutesWorked = 0;
   if (nullptr != _runs) {
     for (int i = 0; i < _runs->size(); ++i) {
       TimeRunner *run = _runs->get(i);
@@ -127,6 +126,8 @@ void TimeKeeper::onDayChange(void)
       }
     }
   }
+  setIsWorking(false);
+  _minutesWorked = 0;
 }
 
 void TimeKeeper::onMinuteChange(void)
